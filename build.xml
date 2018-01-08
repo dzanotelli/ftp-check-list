@@ -1,0 +1,110 @@
+<project name="Check FTP list" default="dist" basedir=".">
+  <description>
+    Basic package to check if the strings provided in the command
+    line (partially) match some file names on the FTP space.
+  </description>
+
+  <!-- project properties -->
+  <property name="project-name" value="Check FTP List" />
+  <property name="project-nick" value="cckftplst" />
+  <property name="project-ver" value="0.1.dev1" />
+  <property name="project-description" value="Check ftp filenames" />
+
+  <!-- build properties -->
+  <property name="src" value="src" />
+  <property name="build" value="build" />
+  <property name="dist" value="dist" />
+  <property name="libs" value="libs" />
+  <property name="libs_abs" location="${libs}" />
+  <property name="main-class" value="CheckFtpList" />
+
+  <!-- libs -->
+  <path id="build_classpath">
+      <fileset id="lib_files" dir="${libs_abs}">
+          <include name="**/*.jar" />
+      </fileset>
+  </path>
+  <!-- <property name="classpath_string" value="${toString:build_classpath}" /> -->
+  <!-- <echo message="classpath string: ${classpath_string}" /> -->
+
+  <!-- <echo message="libs.abs: ${libs.abs}" /> -->
+
+  <!-- create a list of relative paths separated by a space -->
+  <pathconvert targetos="unix" pathsep=' ' property="manifest_classpath" refid="lib_files">
+      <map from="${libs_abs}" to="${libs}" />
+  </pathconvert>
+  <!-- <echo message="mainfest classpath: ${manifest_classpath}" /> -->
+
+  <!-- init -->
+  <target name="init">
+    <!-- create the build dir -->
+    <echo message="Creating build dir '${build}' ..." />
+    <mkdir dir="${build}" />
+
+    <!-- create the dist dir -->
+    <echo message="Creating dist dir '${dist}' ..." />
+    <mkdir dir="${dist}" />
+
+    <!-- create the libs dir in the dist -->
+    <echo message="Creating libs dir '${dist}/${libs}' ..." />
+    <mkdir dir="${dist}/${libs}" />
+
+  </target>
+
+  <!-- copy the libs to dist/libs -->
+  <target name="copy-libs">
+      <echo message="Copying libs from '${libs}' to '${dist}/${libs}' ..." />
+      <copy todir="${dist}/${libs}" flatten="true">
+          <fileset refid="lib_files" />
+      </copy>
+  </target>
+
+
+  <!-- compile -->
+  <target name="compile" depends="init,copy-libs" description="compile the source">
+    <echo message="compiling sources from '${src}' to '${build}' ..."/>
+
+    <javac srcdir="${src}" destdir="${build}" debug="true" encoding="UTF8">
+        <classpath refid="build_classpath" />
+    </javac>
+
+  </target>
+
+  <!-- jar -->
+  <target name="jar" depends="compile" description="create jar file">
+    <echo message="Creating jar file ..." />
+
+    <jar jarfile="${dist}/${project-nick}-${project-ver}.jar" basedir="${build}">
+      <!-- manifest -->
+
+      <manifest>
+        <attribute name="Main-Class" value="${main-class}" />
+        <attribute name="Class-Path" value="${manifest_classpath}" />
+
+        <section name="common">
+          <attribute name="Specification-Title" value="${project-name}" />
+          <attribute name="Specification-Version" value="${project-ver}" />
+          <attribute name="Implementation-Version" value="${project-ver}" />
+        </section>
+      </manifest>
+
+    </jar>
+
+  </target>
+
+  <!-- clean -->
+  <target name="clean" description="clean build and dist dirs">
+    <echo message="Cleaning ..." />
+
+    <!-- delete -->
+    <delete dir="${build}" />
+    <delete dir="${dist}" />
+
+  </target>
+
+  <!-- dist -->
+  <target name="dist" depends="clean,compile,jar" description="create dist (jar)">
+  </target>
+
+
+</project>
