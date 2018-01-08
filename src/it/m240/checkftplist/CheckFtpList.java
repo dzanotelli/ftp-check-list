@@ -131,6 +131,7 @@ class CheckFtpList {
 
         // connect to ftp
         FtpListGetter ftp_getter = new FtpListGetter();
+        ftp_getter.set_user(user);
         ftp_getter.set_host(host);
         ftp_getter.set_port(port);
         ftp_getter.set_password(pwd);
@@ -142,6 +143,8 @@ class CheckFtpList {
 
         // get working dir list
         ArrayList<String> file_list = ftp_getter.get_file_list();
+
+        System.out.println(String.format("how many: %s", file_list.size()));
 
         String entry = "filename: %s";
         for (String item : file_list) {

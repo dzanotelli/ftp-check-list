@@ -44,6 +44,9 @@ class FtpListGetter {
             }
 
             // login
+            // String m = "user: %s pwd: %s";
+            // m = String.format(m, this.user, this.password);
+            // System.out.println(m);
             boolean success = this.client.login(this.user, this.password);
             if (!success) {
                 this.client.logout();
