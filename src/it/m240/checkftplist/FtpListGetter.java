@@ -1,45 +1,24 @@
 import java.io.IOException;
+import java.util.ArrayList;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
+import org.apache.commons.net.ftp.FTPFile;
 
 class FtpListGetter {
     private String host = null;
     private String user = null;
-    private String pwd = null;
+    private String password = null;
     private int port = 0;
     private String remote_dir = "/";
     private boolean passive_mode = false;
     private FTPClient client = null;
 
-    public void FtpListGetter(String host, int port, String user, String pwd,
-                              String remote_dir, boolean passive_mode) {
-
-        this.host = host;
-        this.port = port;
-        this.user = user;
-        this.pwd = pwd;
-        this.remote_dir = remote_dir;
-        this.passive_mode = passive_mode;
-    }
-
-    // overload for default args
-    public void FtpListGetter(String host, String user, String pwd,
-                              String remote_dir) {
-        this.FtpListGetter(host, this.port, user, pwd, this.remote_dir,
-                           this.passive_mode);
-    }
-
-    public String[] FtpListGetter(String host, String user, String pwd) {
-        String[] list = String[];
-        for (FTPFile f : 
-
-        this.FtpListGetter(host, user, pwd, this.remote_dir);
-    }
+    public void FtpListGetter() {}
 
     /**
       * Connect and loging
       */
-    private boolean _connect() {
+    public boolean connect() {
         String msg = null;
 
         // instantiate new client from apache.commons.net
@@ -65,7 +44,7 @@ class FtpListGetter {
             }
 
             // login
-            boolean success = this.client.login(this.user, this.pwd);
+            boolean success = this.client.login(this.user, this.password);
             if (!success) {
                 this.client.logout();
                 msg = "Error while attempting to login. Please check ";
@@ -98,6 +77,7 @@ class FtpListGetter {
             msg += "Details:%s";
             String newline = System.getProperty("line.separator");
             msg = String.format(msg, newline);
+            System.err.println(msg);
             exc.printStackTrace();
             return false;
         }
@@ -109,7 +89,69 @@ class FtpListGetter {
     /**
       * Return the remote listing
       */
-    public get_file_list() {
-        return this.client.mlistDir(this.remote_dir);
+    public ArrayList<String> get_file_list() {
+        ArrayList<String> file_list = new ArrayList<>();
+
+        // get the listing
+        try {
+            for (FTPFile f : this.client.mlistDir(this.get_remote_dir())) {
+                file_list.add(f.getRawListing());
+            }
+        } catch (IOException exc) {
+            String msg = "Error while getting file listing. Details:%s";
+            String newline = System.getProperty("line.separator");
+            msg = String.format(msg, newline);
+            System.err.println(msg);
+            exc.printStackTrace();
+            return null;
+        }
+
+        return file_list;
+    }
+
+
+    /** getters and setters **/
+    public void set_host(String host) {
+        this.host = host;
+    }
+    public String get_host() {
+        return this.host;
+    }
+
+    public void set_port(int port) {
+        this.port = port;
+    }
+    public int get_port() {
+        if (this.port > 0) {
+            return this.port;
+        }
+
+        return 21;
+    }
+
+    public void set_user(String user) {
+        this.user = user;
+    }
+    public String get_user() {
+        return this.user;
+    }
+
+    public void set_password(String pwd) {
+        this.password = pwd;
+    }
+    public String get_password() {
+        return this.password;
+    }
+
+    public void set_remote_dir(String remote_dir) {
+        this.remote_dir = remote_dir;
+    }
+    public String get_remote_dir() {
+        if (this.remote_dir != null) {
+            return this.remote_dir;
+        }
+
+        // return the default
+        return "/";
     }
 }

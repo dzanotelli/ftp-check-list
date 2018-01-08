@@ -1,5 +1,6 @@
+import java.util.ArrayList;
 import org.apache.commons.cli.*;
-import FtpListGetter;
+import org.apache.commons.net.*;
 
 class CheckFtpList {
     public static final String PROGRAM_NAME = "cckftplst";
@@ -103,7 +104,7 @@ class CheckFtpList {
 
         /* retrieving values */
         // set defaults
-        Number port = 21;
+        int port = 21;
         if (line.hasOption("port")) {
             try {
                 port = Integer.parseInt(line.getOptionValue("port"));
@@ -112,9 +113,10 @@ class CheckFtpList {
                 print_error_help_and_exit(options, msg);
             }
         }
-        String directory = null;
+
+        String remote_dir = null;
         if (line.hasOption("directory")) {
-            directory = line.getOptionValue("directory");
+            remote_dir = line.getOptionValue("directory");
         }
 
         // required
@@ -123,13 +125,29 @@ class CheckFtpList {
         String pwd = line.getOptionValue("password");
         String[] filelist = line.getOptionValues("filelist");
 
-
         System.out.println("Checking ftp list ...");
 
-        // FIXME connect to ftp
+        //System.out.println(String.format("pwd: %s", pwd));
+
+        // connect to ftp
+        FtpListGetter ftp_getter = new FtpListGetter();
+        ftp_getter.set_host(host);
+        ftp_getter.set_port(port);
+        ftp_getter.set_password(pwd);
+        ftp_getter.set_remote_dir(remote_dir);
+        if (!ftp_getter.connect()) {
+            System.exit(1);
+        }
 
 
-        // FIXME get working dir list
+        // get working dir list
+        ArrayList<String> file_list = ftp_getter.get_file_list();
+
+        String entry = "filename: %s";
+        for (String item : file_list) {
+            System.out.println(String.format(entry, item));
+        }
+
 
         // FIXME check each file in filelist against remote dir list
     }
@@ -159,5 +177,4 @@ class CheckFtpList {
     private static void print_help_and_exit(Options opts) {
         print_help_and_exit(opts, 0);
     }
-
 }
